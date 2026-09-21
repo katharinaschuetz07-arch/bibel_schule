@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bibelkarten – Dein Begleiter (v1.1.2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Canvas Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+  :root {
+    --gold: #C5A059;
+    --gold-dark: #8C6D2D;
+    --gold-light: #F4ECE1;
+    --burgundy: #6B2D3A;
+    --sand: #F7F5F0;
+    --card: #FFFFFF;
+    --ink: #2C2825;
+    --ink-soft: #6E6862;
+    --line: #E6E1DA;
+    --shadow: 0 4px 16px rgba(44, 40, 37, 0.08);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: radial-gradient(circle at 50% 0%, #FAF8F3 0%, var(--sand) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Compact Tablet Layout (4. bis 7. Klasse optimiert) */
+  .wrap {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 12px 14px;
+  }
+
+  /* Header */
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0 10px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 12px;
+  }
+
+  .header-icon {
+    font-size: 1.4rem;
+    color: var(--gold-dark);
+  }
+
+  .header-center { text-align: center; flex: 1; }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.1rem, 4.2vw, 1.35rem);
+    margin: 0;
+    color: var(--burgundy);
+    letter-spacing: 0.5px;
+  }
+
+  .header-sub {
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  /* Zurück-Button */
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .back-btn:active { color: var(--burgundy); }
+
+  /* Kategorien & Grid */
+  .section-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--burgundy);
+    margin: 12px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .cat-btn {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 10px;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    box-shadow: var(--shadow);
+  }
+  .cat-btn:active { transform: scale(0.98); }
+  .cat-icon { font-size: 1.4rem; }
+  .cat-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .cat-progress-track {
+    width: 100%;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--gold-light);
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .cat-progress-fill {
+    height: 100%;
+    background: var(--gold-dark);
+    border-radius: 4px;
+    width: 0%;
+  }
+  .cat-count { font-size: 0.68rem; color: var(--ink-soft); font-weight: 700; }
+
+  /* Action Buttons */
+  .actions-row { margin-top: 14px; }
+  .pill-btn {
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .pill-btn.quiz { background: var(--burgundy); color: #FFF; }
+  .pill-btn.reset { background: #FFF; color: var(--ink-soft); border: 1px solid var(--line); box-shadow: none; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Lernkarten Stage */
+  .progress-bar-outer {
+    height: 6px;
+    background: var(--gold-light);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 4px 0 12px;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: var(--gold-dark);
+    border-radius: 6px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .card-stage {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 16px;
+    text-align: center;
+    min-height: 270px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .card-index {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+    color: var(--burgundy);
+    margin-top: 6px;
+  }
+
+  .card-passage {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--gold-dark);
+    background: var(--gold-light);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+  }
+
+  .card-text {
+    font-size: 0.88rem;
+    color: var(--ink);
+    line-height: 1.48;
+    margin: 4px 0 8px;
+    white-space: pre-line; /* Für schöne Umbrüche im Vaterunser */
+  }
+
+  .card-tag {
+    position: absolute;
+    bottom: 10px;
+    left: 14px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--gold-dark);
+  }
+
+  .wiki-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--gold-dark);
+    text-decoration: underline;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .speak-btn {
+    border: none;
+    background: var(--gold-light);
+    color: var(--gold-dark);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-row { display: flex; gap: 8px; margin-top: 14px; }
+  .nav-btn {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .nav-btn.prev { background: #FFF; color: var(--ink-soft); border: 1px solid var(--line); }
+  .nav-btn.stop { background: #FFF; color: var(--burgundy); border: 1px solid var(--line); flex: 0 0 auto; padding: 10px 14px; }
+  .nav-btn.next { background: var(--gold-dark); color: #FFF; }
+
+  /* Quiz */
+  .quiz-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .quiz-score { font-weight: 800; color: var(--burgundy); font-size: 0.85rem; }
+  .quiz-question {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    padding: 18px 14px;
+    text-align: center;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .quiz-prompt { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1rem; color: var(--burgundy); line-height: 1.35; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    background: #FFF;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+  .quiz-opt.correct { background: #E8F3EC; border-color: #2D7A47; color: #1E522F; }
+  .quiz-opt.wrong { background: #FBEBEB; border-color: var(--burgundy); color: var(--burgundy); }
+
+  .quiz-result {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    padding: 28px 16px;
+    text-align: center;
+  }
+  .quiz-result .big { font-family: 'Cinzel', serif; font-size: 2.5rem; color: var(--burgundy); font-weight: 700; }
+
+  /* Footer & Modals */
+  footer {
+    max-width: 540px;
+    margin: 16px auto 0;
+    padding: 8px 4px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
+  }
+  footer button {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .copyright-tag { color: var(--ink-soft); font-size: 0.75rem; font-weight: 600; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,40,37,0.4);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 50;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: #FFF;
+    border-radius: var(--radius);
+    max-width: 440px;
+    width: 100%;
+    padding: 20px 16px;
+    box-shadow: var(--shadow);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-box h2 { font-family: 'Cinzel', serif; color: var(--burgundy); margin-top: 0; font-size: 1.1rem; }
+  .modal-box p { font-size: 0.82rem; line-height: 1.5; color: var(--ink); margin: 6px 0; }
+  .modal-close {
+    margin-top: 14px;
+    background: var(--gold-dark);
+    color: #FFF;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="header-icon">✝</div>
+    <div class="header-center">
+      <h1>Bibelkarten</h1>
+      <div class="header-sub">Wissen &amp; Verse • Version 1.1.2</div>
+    </div>
+    <div class="header-icon">📖</div>
+  </header>
+
+  <!-- ÜBERSICHT -->
+  <section id="screen-overview" class="screen active">
+    <div class="section-heading">Themenwelten</div>
+    <div class="grid" id="cat-grid"></div>
+
+    <div class="actions-row">
+      <button class="pill-btn quiz" id="btn-start-quiz">🏆 Kinder-Quiz starten</button>
+    </div>
+  </section>
+
+  <!-- LERNKARTEN -->
+  <section id="screen-cards" class="screen">
+    <button class="back-btn" id="btn-back-from-cards">‹ Zurück zur Übersicht</button>
+
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="card-progress-fill"></div></div>
+    
+    <div class="card-stage" id="card-stage">
+      <div class="card-index" id="card-index">1 von 5</div>
+      <div class="card-title" id="card-title">Titel</div>
+      <div class="card-passage" id="card-passage">Bibelstelle</div>
+      <button class="speak-btn" id="btn-speak" title="Vorlesen">🔊</button>
+      <div class="card-text" id="card-text">Beschreibung / Vers</div>
+      <div id="card-wiki-wrap"></div>
+      <div class="card-tag" id="card-rubrik-tag">Rubrik</div>
+    </div>
+    
+    <div class="nav-row">
+      <button class="nav-btn prev" id="btn-prev">‹ Zurück</button>
+      <button class="nav-btn stop" id="btn-stop">⏹ Stop</button>
+      <button class="nav-btn next" id="btn-next">Weiter ›</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="screen-quiz" class="screen">
+    <button class="back-btn" id="btn-back-from-quiz">‹ Zurück zur Übersicht</button>
+    
+    <div class="quiz-head">
+      <div class="quiz-score" id="quiz-progress-label">Frage 1 / 5</div>
+      <div class="quiz-score" id="quiz-score-label">✅ 0</div>
+    </div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="quiz-progress-fill"></div></div>
+    <div id="quiz-question-area"></div>
+  </section>
+
+  <!-- ERGEBNIS -->
+  <section id="screen-result" class="screen">
+    <div class="quiz-result">
+      <div class="big" id="result-big">5 / 5</div>
+      <p id="result-text">Hervorragend gemacht!</p>
+      <div class="actions-row" style="margin-top:16px;">
+        <button class="pill-btn quiz" id="btn-quiz-again">🔁 Noch einmal spielen</button>
+        <button class="pill-btn reset" id="btn-result-back" style="margin-top:8px;">Zur Übersicht</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <button id="btn-impressum">Impressum</button>
+  <span class="copyright-tag">© 2026</span>
+  <button id="btn-datenschutz">Datenschutz</button>
+</footer>
+
+<!-- IMPRESSUM MODAL -->
+<div class="modal-overlay" id="modal-impressum">
+  <div class="modal-box">
+    <h2>Impressum</h2>
+    <p><strong>Herausgeberin:</strong><br>Katharina Schütz</p>
+    <p><strong>Zielgruppe &amp; Zweck:</strong><br>Diese Lern-App ist speziell für Kinder der <strong>4. bis 7. Klasse</strong> gestaltet, um sich schnell grundlegendes Bibelwissen anzueignen und einen klaren Überblick zu gewinnen. Es handelt sich um eine private Lern-App.</p>
+    <p><strong>Erstellung &amp; KI-Hinweis:</strong><br>Der Programmcode (CSS, HTML, JavaScript) sowie die inhaltliche Zusammenstellung wurden mit Hilfe einer künstlichen Intelligenz (KI) erstellt. KI kann Fehler machen. Es wird daher keine Haftung für Richtigkeit oder Vollständigkeit übernommen.</p>
+    <p><strong>Urheberrecht &amp; Weitergabe:</strong><br>Diese App darf ohne ausdrückliche Einwilligung der Autorin nicht weitergegeben, vervielfältigt oder weiterverwendet werden.</p>
+  </div>
+</div>
+
+<!-- DATENSCHUTZ MODAL -->
+<div class="modal-overlay" id="modal-datenschutz">
+  <div class="modal-box">
+    <h2>Datenschutzbestimmungen</h2>
+    <p><strong>1. Allgemeine Hinweise:</strong><br>Diese Lern-App läuft vollständig lokal in Ihrem Webbrowser.</p>
+    <p><strong>2. Datenerfassung &amp; Cookies:</strong><br>Es werden keine persönlichen Daten erfasst, nachverfolgt (Tracking) oder gespeichert. Es kommen keine Cookies zum Einsatz.</p>
+    <p><strong>3. Externe Links (Wikipedia):</strong><br>Die App enthält Links zu Wikipedia. Bei Klick verlassen Sie diese App. Für die dortigen Inhalte gilt die Datenschutzerklärung der Wikimedia Foundation.</p>
+    <p><strong>4. Fragen zum Datenschutz:</strong><br>Bei Fragen wenden Sie sich bitte an die Autorin (siehe Impressum).</p>
+  </div>
+</div>
+
+<script>
+/* ===== BIBEL-INHALTE ===== */
+const BIBLE_CATEGORIES = [
+  {
+    id: "cat_basis",
+    name: "Grundwissen & Aufbau",
+    rubrik: "Grundlagen",
+    icon: "📚",
+    cards: [
+      { 
+        title: "Aufbau der Bibel", 
+        passage: "AT & NT",
+        text: "Die Bibel besteht aus zwei großen Teilen: Dem Alten Testament (AT) und dem Neuen Testament (NT).",
+        question: "Aus welchen zwei großen Teilen besteht die Bibel?",
+        wiki: "https://de.wikipedia.org/wiki/Bibel"
+      },
+      { 
+        title: "Das Alte Testament (AT)", 
+        passage: "Mind. 39 Bücher",
+        text: "Enthält die Schöpfung, die Geschichte Israels und Propheten. Es hat in allen Christentümern mindestens 39 Bücher.",
+        question: "Wie viele Bücher hat das Alte Testament mindestens?",
+        wiki: "https://de.wikipedia.org/wiki/Altes_Testament"
+      },
+      { 
+        title: "Das Neue Testament (NT)", 
+        passage: "27 Bücher",
+        text: "Erzählt von Jesus, seinen Aposteln und der ersten Kirche. Es umfasst exakt 27 Bücher.",
+        question: "Wie viele Bücher hat das Neue Testament?",
+        wiki: "https://de.wikipedia.org/wiki/Neues_Testament"
+      },
+      { 
+        title: "Evangelische Bibel", 
+        passage: "66 Bücher gesamt",
+        text: "Die evangelische Bibel hat insgesamt 66 Bücher (39 im AT + 27 im NT).",
+        question: "Wie viele Bücher hat die evangelische Bibel insgesamt?",
+        wiki: "https://de.wikipedia.org/wiki/Protestantismus"
+      },
+      { 
+        title: "Katholische Bibel", 
+        passage: "73 Bücher gesamt",
+        text: "Die katholische Bibel hat 73 Bücher. Sie enthält 7 zusätzliche Bücher im AT (Deuterokanonische Bücher / Apokryphen).",
+        question: "Wie viele Bücher gehören zur katholischen Bibel?",
+        wiki: "https://de.wikipedia.org/wiki/Deuterokanonisch"
+      }
+    ]
+  },
+  {
+    id: "cat_tora",
+    name: "Die Tora (5 Bücher Mose)",
+    rubrik: "Überblick",
+    icon: "📜",
+    cards: [
+      {
+        title: "Die Tora / Pentateuch",
+        passage: "1. - 5. Mose",
+        text: "Die ersten 5 Bücher der Bibel heißen 'Tora' (hebräisch für Weisung) oder 'Pentateuch'. Sie wurden Mose zugeschrieben.",
+        question: "Wie heißen die ersten fünf Bücher der Bibel auf Hebräisch?"
+      },
+      {
+        title: "1. Buch Mose: Genesis",
+        passage: "1. Mose / Genesis",
+        text: "Bedeutet 'Ursprung'. Erzählt von der Schöpfung der Welt, Noah, Abraham, Isaak und Jakob.",
+        question: "Welches Buch erzählt von der Schöpfung und der Arche Noah?"
+      },
+      {
+        title: "2. Buch Mose: Exodus",
+        passage: "2. Mose / Exodus",
+        text: "Bedeutet 'Auszug'. Erzählt vom Auszug des Volkes Israel aus Ägypten und den 10 Geboten am Berg Sinai.",
+        question: "In welchem Buch Mose geht es um den Auszug aus Ägypten?"
+      },
+      {
+        title: "3. Buch Mose: Levitikus",
+        passage: "3. Mose / Levitikus",
+        text: "Enthält die Gesetze für Priester (Leviten), Gottesdienste und Feste des Volkes Israel.",
+        question: "Welches 3. Buch Mose beschreibt vor allem Priestergesetze?"
+      },
+      {
+        title: "4. & 5. Mose: Numeri & Deuteronomium",
+        passage: "4. & 5. Mose",
+        text: "Numeri berichtet von der 40-jährigen Wüstenwanderung. Deuteronomium ('Zweites Gesetz') fasst Mose' Abschiedsreden zusammen.",
+        question: "Welches Buch berichtet von der 40-jährigen Wüstenwanderung?"
+      }
+    ]
+  },
+  {
+    id: "cat_personen_at",
+    name: "Personen im AT",
+    rubrik: "Altes Testament",
+    icon: "👑",
+    cards: [
+      {
+        title: "Noah",
+        passage: "1. Mose 6–9",
+        text: "Gott trug Noah auf, eine riesige Arche zu bauen, um seine Familie und Paare aller Tiere vor der Sintflut zu retten.",
+        question: "Wer baute auf Gottes Befehl eine Arche zur Rettung vor der Sintflut?"
+      },
+      {
+        title: "Abraham",
+        passage: "1. Mose 12, 1–3",
+        text: "Gilt als Stammvater des Volkes Israel. Gott versprach ihm ein großes Volk und segnete seine Familie.",
+        question: "Wer gilt als der Stammvater des Volkes Israel?"
+      },
+      {
+        title: "Mose",
+        passage: "2. Mose 3 & 14",
+        text: "Führte das Volk Israel aus Ägypten, teilte das Schilfmeer und empfing die 10 Gebote von Gott am Berg Sinai.",
+        question: "Wer empfing von Gott die 10 Gebote am Berg Sinai?"
+      },
+      {
+        title: "König David",
+        passage: "1. Samuel 17",
+        text: "Besiegte als junger Hirte den Riesen Goliath nur mit einer Schleuder und Gottvertrauen. Später wurde er Israels berühmtester König.",
+        question: "Wer besiegte den Riesen Goliath mit einer Schleuder?"
+      }
+    ]
+  },
+  {
+    id: "cat_personen_nt",
+    name: "Personen im NT",
+    rubrik: "Neues Testament",
+    icon: "🌟",
+    cards: [
+      {
+        title: "Maria",
+        passage: "Lukas 1, 26–38",
+        text: "Die Mutter von Jesus. Der Engel Gabriel verkündete ihr, dass sie den Sohn Gottes zur Welt bringen würde.",
+        question: "Welcher Engel verkündete Maria die Geburt Jesu?"
+      },
+      {
+        title: "Johannes der Täufer",
+        passage: "Matthäus 3, 1–17",
+        text: "Rief die Menschen zur Umkehr auf und taufte auch Jesus im Fluss Jordan.",
+        question: "In welchem Fluss taufte Johannes der Täufer Jesus?"
+      },
+      {
+        title: "Petrus",
+        passage: "Matthäus 16, 18",
+        text: "Ein Fischer, der einer der engsten Jünger Jesu wurde. Er gilt als 'Fels', auf dem die Kirche gebaut ist.",
+        question: "Welcher Jünger Jesu war von Beruf Fischer und galt als 'Fels'?"
+      },
+      {
+        title: "Paulus",
+        passage: "Apostelgeschichte 9",
+        text: "Wandelte sich vom Verfolger der Christen zum bekanntesten Missionar, der viele Briefe im Neuen Testament schrieb.",
+        question: "Welcher frühere Verfolger wurde zum berühmten Missionar im NT?"
+      }
+    ]
+  },
+  {
+    id: "cat_gebete",
+    name: "Wichtige Gebete",
+    rubrik: "Glaube & Praxis",
+    icon: "🙏",
+    cards: [
+      { 
+        title: "Das Vaterunser (Komplett)", 
+        passage: "Matthäus 6, 9–13",
+        text: "Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unseren Schuldigern. Und führe uns nicht in Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.",
+        question: "In welchem Evangelium steht das Vaterunser in der Bergpredigt?"
+      },
+      { 
+        title: "Der Aaronitische Segen", 
+        passage: "4. Mose 6, 24–26",
+        text: "Der Herr segne dich und behüte dich. Der Herr lasse sein Angesicht leuchten über dir und sei dir gnädig. Der Herr hebe sein Angesicht über dich und gebe dir Frieden.",
+        question: "In welchem Buch Mose steht der berühmte Aaronitische Segen?"
+      },
+      { 
+        title: "Der Hirtenpsalm", 
+        passage: "Psalm 23, 1–2",
+        text: "Der Herr ist mein Hirte, mir wird nichts mangeln. Er weidet mich auf einer grünen Aue und führet mich zum frischen Wasser.",
+        question: "Wie beginnt der bekannte Psalm 23?"
+      }
+    ]
+  },
+  {
+    id: "cat_werte",
+    name: "Biblische Werte",
+    rubrik: "Lebensregeln",
+    icon: "🕯️",
+    cards: [
+      { 
+        title: "Das Doppelgebot der Liebe", 
+        passage: "Matthäus 22, 37–39",
+        text: "Du sollst den Herrn, deinen Gott, lieben von ganzem Herzen. Und du sollst deinen Nächsten lieben wie dich selbst.",
+        question: "Wen sollst du laut dem Doppelgebot lieben wie dich selbst?"
+      },
+      { 
+        title: "Die Goldene Regel", 
+        passage: "Matthäus 7, 12",
+        text: "Alles nun, was ihr wollt, dass euch die Menschen tun sollen, das tut ihnen auch!",
+        question: "Wie nennt man die Regel: 'Was du willst, dass man dir tut, das tue auch anderen'?"
+      },
+      { 
+        title: "Die Ten Commandments (10 Gebote)", 
+        passage: "2. Mose 20, 1–17",
+        text: "Gottes Wegweiser für unser Leben, darunter: Du sollst nicht stehlen, du sollst nicht lügen, du sollst Vater und Mutter ehren.",
+        question: "Auf welchem Berg empfing Mose die 10 Gebote?"
+      }
+    ]
+  }
+];
+
+/* ===== STATE & LOCAL STORAGE ===== */
+let currentCat = null;
+let currentIdx = 0;
+let progressData = loadProgress();
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem('bibelAppProgress_v112');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function saveProgress() {
+  try { localStorage.setItem('bibelAppProgress_v112', JSON.stringify(progressData)); } catch(e){}
+}
+
+function markSeen(catId, idx) {
+  if (!progressData[catId]) progressData[catId] = [];
+  if (!progressData[catId].includes(idx)) progressData[catId].push(idx);
+  saveProgress();
+}
+
+function getSeenCount(catId) {
+  return (progressData[catId] || []).length;
+}
+
+/* ===== RENDERING ÜBERSICHT ===== */
+function renderOverview() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = '';
+  BIBLE_CATEGORIES.forEach(cat => {
+    const done = getSeenCount(cat.id);
+    const total = cat.cards.length;
+    const pct = Math.round((done / total) * 100);
+    
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.innerHTML = `
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-progress-track"><div class="cat-progress-fill" style="width:${pct}%"></div></div>
+      <div class="cat-count">${done} / ${total} gelernt</div>
+    `;
+    btn.addEventListener('click', () => openCategory(cat));
+    grid.appendChild(btn);
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'instant'});
+}
+
+/* ===== SPRACHAUSGABE ===== */
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE';
+    u.rate = 0.9;
+    setTimeout(() => {
+      try { window.speechSynthesis.speak(u); } catch(e){}
+    }, 80);
+  } catch(e){}
+}
+
+/* ===== KARTEN ANSICHT ===== */
+function openCategory(cat) {
+  currentCat = cat;
+  currentIdx = 0;
+  showScreen('screen-cards');
+  renderCard();
+}
+
+function renderCard() {
+  const card = currentCat.cards[currentIdx];
+  document.getElementById('card-index').textContent = `${currentIdx + 1} von ${currentCat.cards.length}`;
+  document.getElementById('card-title').textContent = card.title;
+  document.getElementById('card-passage').textContent = card.passage || '';
+  document.getElementById('card-text').textContent = card.text;
+  document.getElementById('card-rubrik-tag').textContent = currentCat.rubrik;
+
+  const wikiWrap = document.getElementById('card-wiki-wrap');
+  if (card.wiki) {
+    wikiWrap.innerHTML = `<a href="${card.wiki}" target="_blank" rel="noopener" class="wiki-link" onclick="event.stopPropagation();">🔗 Mehr auf Wikipedia lesen</a>`;
+  } else {
+    wikiWrap.innerHTML = '';
+  }
+
+  const pct = Math.round(((currentIdx + 1) / currentCat.cards.length) * 100);
+  document.getElementById('card-progress-fill').style.width = pct + '%';
+  
+  markSeen(currentCat.id, currentIdx);
+}
+
+document.getElementById('card-stage').addEventListener('click', (e) => {
+  if (e.target.closest('#btn-speak') || e.target.closest('.wiki-link')) return;
+  if (currentIdx < currentCat.cards.length - 1) {
+    currentIdx++;
+    renderCard();
+  } else {
+    showScreen('screen-overview');
+    renderOverview();
+  }
+});
+
+document.getElementById('btn-speak').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const card = currentCat.cards[currentIdx];
+  speak(`${card.title}. Bibelstelle: ${card.passage || ''}. ${card.text}`);
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (currentIdx < currentCat.cards.length - 1) {
+    currentIdx++;
+    renderCard();
+  } else {
+    showScreen('screen-overview');
+    renderOverview();
+  }
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (currentIdx > 0) {
+    currentIdx--;
+    renderCard();
+  }
+});
+
+document.getElementById('btn-stop').addEventListener('click', () => {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+});
+
+document.getElementById('btn-back-from-cards').addEventListener('click', () => {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  showScreen('screen-overview');
+  renderOverview();
+});
+
+/* ===== QUIZ LOGIK (Echte Fragen & Konfetti) ===== */
+let quizQuestions = [];
+let quizIndex = 0;
+let quizScore = 0;
+
+function buildQuiz() {
+  const allCards = [];
+  BIBLE_CATEGORIES.forEach(c => c.cards.forEach(card => {
+    if (card.question) allCards.push(card);
+  }));
+
+  const shuffled = [...allCards].sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, 5);
+
+  return selected.map(q => {
+    const wrongPool = allCards.filter(x => x.title !== q.title);
+    const wrongShuffled = wrongPool.sort(() => 0.5 - Math.random());
+    const wrongs = wrongShuffled.slice(0, 2).map(x => x.title);
+    const options = [q.title, ...wrongs].sort(() => 0.5 - Math.random());
+    return { promptQuestion: q.question, correctAnswer: q.title, options };
+  });
+}
+
+document.getElementById('btn-start-quiz').addEventListener('click', startQuiz);
+document.getElementById('btn-quiz-again').addEventListener('click', startQuiz);
+
+function startQuiz() {
+  quizQuestions = buildQuiz();
+  quizIndex = 0;
+  quizScore = 0;
+  showScreen('screen-quiz');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const q = quizQuestions[quizIndex];
+  document.getElementById('quiz-progress-label').textContent = `Frage ${quizIndex + 1} / ${quizQuestions.length}`;
+  document.getElementById('quiz-score-label').textContent = `✅ ${quizScore}`;
+  document.getElementById('quiz-progress-fill').style.width = Math.round((quizIndex / quizQuestions.length) * 100) + '%';
+
+  const area = document.getElementById('quiz-question-area');
+  area.innerHTML = `
+    <div class="quiz-question">
+      <div class="quiz-prompt">❓ ${q.promptQuestion}</div>
+    </div>
+    <div class="quiz-options" id="quiz-options"></div>
+  `;
+
+  const optWrap = document.getElementById('quiz-options');
+  q.options.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'quiz-opt';
+    b.textContent = opt;
+    b.addEventListener('click', () => selectQuizAnswer(opt, b));
+    optWrap.appendChild(b);
+  });
+}
+
+function selectQuizAnswer(chosen, btnEl) {
+  const q = quizQuestions[quizIndex];
+  const buttons = document.querySelectorAll('.quiz-opt');
+  buttons.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.correctAnswer) b.classList.add('correct');
+  });
+
+  if (chosen === q.correctAnswer) {
+    quizScore++;
+    document.getElementById('quiz-score-label').textContent = `✅ ${quizScore}`;
+  } else {
+    btnEl.classList.add('wrong');
+  }
+
+  setTimeout(() => {
+    quizIndex++;
+    if (quizIndex < quizQuestions.length) {
+      renderQuizQuestion();
+    } else {
+      finishQuiz();
+    }
+  }, 1200);
+}
+
+function triggerConfetti() {
+  if (typeof confetti === 'function') {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }
+}
+
+function finishQuiz() {
+  document.getElementById('quiz-progress-fill').style.width = '100%';
+  showScreen('screen-result');
+  document.getElementById('result-big').textContent = `${quizScore} / ${quizQuestions.length}`;
+  
+  if (quizScore === 5) {
+    document.getElementById('result-text').textContent = '🎉 PERFEKT! Du bist ein echter Bibel-Profi!';
+  } else if (quizScore >= 3) {
+    document.getElementById('result-text').textContent = 'Toll gemacht! Du weißt schon sehr viel!';
+  } else {
+    document.getElementById('result-text').textContent = 'Guter Versuch! Übe noch ein wenig weiter.';
+  }
+
+  // Konfetti-Regen bei Beendigung aller 5 Fragen!
+  triggerConfetti();
+}
+
+document.getElementById('btn-back-from-quiz').addEventListener('click', () => {
+  showScreen('screen-overview');
+  renderOverview();
+});
+document.getElementById('btn-result-back').addEventListener('click', () => {
+  showScreen('screen-overview');
+  renderOverview();
+});
+
+/* ===== MODALS ===== */
+document.getElementById('btn-impressum').addEventListener('click', () => document.getElementById('modal-impressum').classList.add('active'));
+document.getElementById('btn-datenschutz').addEventListener('click', () => document.getElementById('modal-datenschutz').classList.add('active'));
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+document.querySelectorAll('.modal-box').forEach(box => {
+  if (!box.querySelector('.modal-close')) {
+    const btn = document.createElement('button');
+    btn.className = 'modal-close';
+    btn.textContent = 'Schließen';
+    btn.addEventListener('click', () => box.closest('.modal-overlay').classList.remove('active'));
+    box.appendChild(btn);
+  }
+});
+
+/* INIT */
+renderOverview();
+</script>
+</body>
+</html>
