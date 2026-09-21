@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Bibelkarten – Dein Begleiter (v1.1.2)</title>
+<title>Bibelkarten – Dein Begleiter (v1.2.0)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <!-- Canvas Confetti Library -->
@@ -35,7 +35,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Compact Tablet Layout (4. bis 7. Klasse optimiert) */
   .wrap {
     max-width: 540px;
     margin: 0 auto;
@@ -234,7 +233,7 @@
     color: var(--ink);
     line-height: 1.48;
     margin: 4px 0 8px;
-    white-space: pre-line; /* Für schöne Umbrüche im Vaterunser */
+    white-space: pre-line;
   }
 
   .card-tag {
@@ -391,7 +390,7 @@
     <div class="header-icon">✝</div>
     <div class="header-center">
       <h1>Bibelkarten</h1>
-      <div class="header-sub">Wissen &amp; Verse • Version 1.1.2</div>
+      <div class="header-sub">Wissen &amp; Verse • Version 1.2.0</div>
     </div>
     <div class="header-icon">📖</div>
   </header>
@@ -413,7 +412,7 @@
     <div class="progress-bar-outer"><div class="progress-bar-inner" id="card-progress-fill"></div></div>
     
     <div class="card-stage" id="card-stage">
-      <div class="card-index" id="card-index">1 von 5</div>
+      <div class="card-index" id="card-index">1 von 10</div>
       <div class="card-title" id="card-title">Titel</div>
       <div class="card-passage" id="card-passage">Bibelstelle</div>
       <button class="speak-btn" id="btn-speak" title="Vorlesen">🔊</button>
@@ -484,7 +483,7 @@
 </div>
 
 <script>
-/* ===== BIBEL-INHALTE ===== */
+/* ===== BIBEL-INHALTE (6 Rubriken mit je 10 Karten = 60 Karten) ===== */
 const BIBLE_CATEGORIES = [
   {
     id: "cat_basis",
@@ -495,37 +494,87 @@ const BIBLE_CATEGORIES = [
       { 
         title: "Aufbau der Bibel", 
         passage: "AT & NT",
-        text: "Die Bibel besteht aus zwei großen Teilen: Dem Alten Testament (AT) und dem Neuen Testament (NT).",
-        question: "Aus welchen zwei großen Teilen besteht die Bibel?",
+        text: "Die Bibel besteht aus zwei großen Hauptteilen: Dem Alten Testament (AT) und dem Neuen Testament (NT).",
+        question: "Aus welchen zwei großen Hauptteilen besteht die Bibel?",
+        answer: "Altes und Neues Testament",
+        wrongs: ["Tora und Koran", "Evangelium und Psalmen"],
         wiki: "https://de.wikipedia.org/wiki/Bibel"
       },
       { 
         title: "Das Alte Testament (AT)", 
         passage: "Mind. 39 Bücher",
-        text: "Enthält die Schöpfung, die Geschichte Israels und Propheten. Es hat in allen Christentümern mindestens 39 Bücher.",
+        text: "Enthält die Schöpfung, die Geschichte Israels und die Propheten. Es umfasst mindestens 39 Bücher.",
         question: "Wie viele Bücher hat das Alte Testament mindestens?",
+        answer: "39 Bücher",
+        wrongs: ["27 Bücher", "50 Bücher"],
         wiki: "https://de.wikipedia.org/wiki/Altes_Testament"
       },
       { 
         title: "Das Neue Testament (NT)", 
         passage: "27 Bücher",
-        text: "Erzählt von Jesus, seinen Aposteln und der ersten Kirche. Es umfasst exakt 27 Bücher.",
-        question: "Wie viele Bücher hat das Neue Testament?",
+        text: "Erzählt von Jesus Christus, seinen Aposteln und der ersten Kirche. Es umfasst exakt 27 Bücher.",
+        question: "Wie viele Bücher umfasst das Neue Testament exakt?",
+        answer: "27 Bücher",
+        wrongs: ["12 Bücher", "39 Bücher"],
         wiki: "https://de.wikipedia.org/wiki/Neues_Testament"
       },
       { 
         title: "Evangelische Bibel", 
         passage: "66 Bücher gesamt",
-        text: "Die evangelische Bibel hat insgesamt 66 Bücher (39 im AT + 27 im NT).",
-        question: "Wie viele Bücher hat die evangelische Bibel insgesamt?",
+        text: "Die evangelische Bibel hat insgesamt 66 Bücher (39 im Alten und 27 im Neuen Testament).",
+        question: "Wie viele Bücher umfasst die evangelische Bibel insgesamt?",
+        answer: "66 Bücher",
+        wrongs: ["73 Bücher", "52 Bücher"],
         wiki: "https://de.wikipedia.org/wiki/Protestantismus"
       },
       { 
         title: "Katholische Bibel", 
         passage: "73 Bücher gesamt",
         text: "Die katholische Bibel hat 73 Bücher. Sie enthält 7 zusätzliche Bücher im AT (Deuterokanonische Bücher / Apokryphen).",
-        question: "Wie viele Bücher gehören zur katholischen Bibel?",
+        question: "Wie viele Bücher hat die katholische Bibel insgesamt?",
+        answer: "73 Bücher",
+        wrongs: ["66 Bücher", "80 Bücher"],
         wiki: "https://de.wikipedia.org/wiki/Deuterokanonisch"
+      },
+      {
+        title: "Entstehung der Schrift",
+        passage: "Über 1000 Jahre",
+        text: "Die Bibel wurde nicht von einer einzelnen Person geschrieben, sondern entstand über mehr als 1000 Jahre hinweg durch viele verschiedene Autoren.",
+        question: "Über welchen Zeitraum hinweg entstanden die Texte der Bibel?",
+        answer: "Über 1000 Jahre",
+        wrongs: ["In genau 10 Jahren", "Innerhalb eines Monats"]
+      },
+      {
+        title: "Die Evangelien",
+        passage: "4 Bücher im NT",
+        text: "Die vier Evangelien nach Matthäus, Markus, Lukas und Johannes berichten vom Leben, Handeln, Sterben und der Auferstehung Jesu.",
+        question: "Wie viele Evangelien gibt es im Neuen Testament?",
+        answer: "4 Evangelien",
+        wrongs: ["2 Evangelien", "12 Evangelien"]
+      },
+      {
+        title: "Sprachen der Bibel",
+        passage: "Hebräisch, Aramäisch, Griechisch",
+        text: "Das Alte Testament wurde hauptsächlich auf Hebräisch verfasst, das Neue Testament auf Griechisch (Altgriechisch / Koine).",
+        question: "In welcher Sprache wurde das Neue Testament ursprünglich geschrieben?",
+        answer: "Griechisch",
+        wrongs: ["Latein", "Deutsch"]
+      },
+      {
+        title: "Die Apostelgeschichte",
+        passage: "NT",
+        text: "Berichtet direkt im Anschluss an die Evangelien, wie sich das Christentum in der damaligen Welt ausbreitete.",
+        question: "Welches Buch im NT berichtet über die Ausbreitung der ersten christlichen Gemeinden?",
+        answer: "Apostelgeschichte",
+        wrongs: ["Offenbarung", "Genesis"]
+      },
+      {
+        title: "Die Psalmen",
+        passage: "150 Lieder & Gebete",
+        text: "Das Buch der Psalmen im Alten Testament ist eine Sammlung von 150 Gebeten, Liedern und Gedichten.",
+        question: "Wie viele Psalmen enthält das Buch der Psalmen im AT?",
+        answer: "150 Psalmen",
+        wrongs: ["100 Psalmen", "365 Psalmen"]
       }
     ]
   },
@@ -538,32 +587,82 @@ const BIBLE_CATEGORIES = [
       {
         title: "Die Tora / Pentateuch",
         passage: "1. - 5. Mose",
-        text: "Die ersten 5 Bücher der Bibel heißen 'Tora' (hebräisch für Weisung) oder 'Pentateuch'. Sie wurden Mose zugeschrieben.",
-        question: "Wie heißen die ersten fünf Bücher der Bibel auf Hebräisch?"
+        text: "Die ersten 5 Bücher der Bibel heißen 'Tora' (hebräisch für Weisung) oder 'Pentateuch'. Sie wurden traditionell Mose zugeschrieben.",
+        question: "Wie heißen die ersten fünf Bücher der Bibel auf Hebräisch?",
+        answer: "Tora",
+        wrongs: ["Psalmen", "Evangelium"]
       },
       {
         title: "1. Buch Mose: Genesis",
         passage: "1. Mose / Genesis",
-        text: "Bedeutet 'Ursprung'. Erzählt von der Schöpfung der Welt, Noah, Abraham, Isaak und Jakob.",
-        question: "Welches Buch erzählt von der Schöpfung und der Arche Noah?"
+        text: "Bedeutet 'Ursprung'. Erzählt von der Schöpfung der Welt, Noah, Abraham, Isaak, Jakob und Josef.",
+        question: "Welches lateinisch/griechische Wort bedeutet 'Ursprung' und bezeichnet das 1. Buch Mose?",
+        answer: "Genesis",
+        wrongs: ["Exodus", "Levitikus"]
       },
       {
         title: "2. Buch Mose: Exodus",
         passage: "2. Mose / Exodus",
         text: "Bedeutet 'Auszug'. Erzählt vom Auszug des Volkes Israel aus Ägypten und den 10 Geboten am Berg Sinai.",
-        question: "In welchem Buch Mose geht es um den Auszug aus Ägypten?"
+        question: "Welches Buch beschreibt den Auszug des Volkes Israel aus Ägypten?",
+        answer: "Exodus (2. Mose)",
+        wrongs: ["Genesis (1. Mose)", "Numeri (4. Mose)"]
       },
       {
         title: "3. Buch Mose: Levitikus",
         passage: "3. Mose / Levitikus",
-        text: "Enthält die Gesetze für Priester (Leviten), Gottesdienste und Feste des Volkes Israel.",
-        question: "Welches 3. Buch Mose beschreibt vor allem Priestergesetze?"
+        text: "Enthält die Gesetzgebung für die Priester (Leviten), Regeln für Opfer, Gottesdienste und Feste des Volkes Israel.",
+        question: "Welches Buch Mose beschreibt vor allem die Priester- und Gottesdienstgesetze?",
+        answer: "Levitikus (3. Mose)",
+        wrongs: ["Deuteronomium (5. Mose)", "Genesis (1. Mose)"]
       },
       {
-        title: "4. & 5. Mose: Numeri & Deuteronomium",
-        passage: "4. & 5. Mose",
-        text: "Numeri berichtet von der 40-jährigen Wüstenwanderung. Deuteronomium ('Zweites Gesetz') fasst Mose' Abschiedsreden zusammen.",
-        question: "Welches Buch berichtet von der 40-jährigen Wüstenwanderung?"
+        title: "4. Buch Mose: Numeri",
+        passage: "4. Mose / Numeri",
+        text: "Bedeutet 'Zählungen'. Berichtet von der Wüstenzählung des Volkes und der 40-jährigen Wüstenwanderung.",
+        question: "Welches Buch berichtet von den Zählungen und der 40-jährigen Wüstenwanderung?",
+        answer: "Numeri (4. Mose)",
+        wrongs: ["Exodus (2. Mose)", "Levitikus (3. Mose)"]
+      },
+      {
+        title: "5. Buch Mose: Deuteronomium",
+        passage: "5. Mose / Deuteronomium",
+        text: "Bedeutet 'Zweites Gesetz'. Es fasst die Abschiedsreden von Mose kurz vor dem Einzug ins Verheißene Land zusammen.",
+        question: "Was bedeutet die Bezeichnung 'Deuteronomium' übersetzt?",
+        answer: "Zweites Gesetz",
+        wrongs: ["Erster Auszug", "Gesangbuch"]
+      },
+      {
+        title: "Die Schöpfung",
+        passage: "1. Mose 1–2",
+        text: "Gott schuf die Welt in sechs Tagen und ruhte am siebten Tag. Am sechsten Tag erschuf er den Menschen.",
+        question: "An welchem Tag ruhte Gott laut dem Schöpfungsbericht?",
+        answer: "Am 7. Tag",
+        wrongs: ["Am 1. Tag", "Am 6. Tag"]
+      },
+      {
+        title: "Die Arche Noah",
+        passage: "1. Mose 6–9",
+        text: "Gott befahl Noah, ein großes Schiff zu bauen, um seine Familie und die Tiere vor der Sintflut zu retten.",
+        question: "Wie hieß das große Schiff, das Noah vor der Sintflut rettete?",
+        answer: "Arche",
+        wrongs: ["Kogge", "Galeere"]
+      },
+      {
+        title: "Der Turmbau zu Babel",
+        passage: "1. Mose 11",
+        text: "Die Menschen wollten einen Turm bis zum Himmel bauen. Gott verwirrte ihre Sprache, sodass sie sich in alle Welt zerstreuten.",
+        question: "Warum scheiterte der Bau des Turms zu Babel?",
+        answer: "Gott verwirrte die Sprachen",
+        wrongs: ["Ein Sturm zerstörte ihn", "Es gab keine Steine mehr"]
+      },
+      {
+        title: "Josef in Ägypten",
+        passage: "1. Mose 37–50",
+        text: "Josef wurde von seinen Brüdern verkauft, stieg in Ägypten zum Berater des Pharao auf und rettete seine Familie vor dem Hungersnot.",
+        question: "Wohin wurde Josef von seinen Brüdern verkauft?",
+        answer: "Nach Ägypten",
+        wrongs: ["Nach Babylon", "Nach Rom"]
       }
     ]
   },
@@ -577,25 +676,81 @@ const BIBLE_CATEGORIES = [
         title: "Noah",
         passage: "1. Mose 6–9",
         text: "Gott trug Noah auf, eine riesige Arche zu bauen, um seine Familie und Paare aller Tiere vor der Sintflut zu retten.",
-        question: "Wer baute auf Gottes Befehl eine Arche zur Rettung vor der Sintflut?"
+        question: "Wer baute auf Gottes Befehl die Arche zur Rettung vor der Sintflut?",
+        answer: "Noah",
+        wrongs: ["Abraham", "Mose"]
       },
       {
         title: "Abraham",
         passage: "1. Mose 12, 1–3",
-        text: "Gilt als Stammvater des Volkes Israel. Gott versprach ihm ein großes Volk und segnete seine Familie.",
-        question: "Wer gilt als der Stammvater des Volkes Israel?"
+        text: "Gilt als Stammvater des Volkes Israel. Gott versprach ihm ein großes Volk und segnete seine Nachkommen.",
+        question: "Wer gilt als der Stammvater des Volkes Israel?",
+        answer: "Abraham",
+        wrongs: ["David", "Salomo"]
       },
       {
         title: "Mose",
         passage: "2. Mose 3 & 14",
-        text: "Führte das Volk Israel aus Ägypten, teilte das Schilfmeer und empfing die 10 Gebote von Gott am Berg Sinai.",
-        question: "Wer empfing von Gott die 10 Gebote am Berg Sinai?"
+        text: "Führte das Volk Israel aus Ägypten, teilte das Schilfmeer und empfing die 10 Gebote am Berg Sinai.",
+        question: "Wer empfing von Gott die 10 Gebote am Berg Sinai?",
+        answer: "Mose",
+        wrongs: ["Noah", "König Saul"]
       },
       {
         title: "König David",
         passage: "1. Samuel 17",
-        text: "Besiegte als junger Hirte den Riesen Goliath nur mit einer Schleuder und Gottvertrauen. Später wurde er Israels berühmtester König.",
-        question: "Wer besiegte den Riesen Goliath mit einer Schleuder?"
+        text: "Besiegte als junger Hirte den Riesen Goliath nur mit einer Schleuder und Gottvertrauen. Später wurde er Israels bekanntester König.",
+        question: "Wer besiegte den Riesen Goliath mit einer Schleuder?",
+        answer: "König David",
+        wrongs: ["König Salomo", "Samson"]
+      },
+      {
+        title: "König Salomo",
+        passage: "1. Könige 3",
+        text: "Sohn von David, bekannt für seine große Weisheit und den Bau des ersten großen Tempels in Jerusalem.",
+        question: "Welcher König erbaute den ersten großen Tempel in Jerusalem?",
+        answer: "König Salomo",
+        wrongs: ["König Saul", "König David"]
+      },
+      {
+        title: "Sara",
+        passage: "1. Mose 17–21",
+        text: "Die Frau Abrahams. Trotz ihres hohen Alters wurde sie die Mutter von Isaak, wie Gott es versprochen hatte.",
+        question: "Wie hieß die Frau von Abraham und Mutter von Isaak?",
+        answer: "Sara",
+        wrongs: ["Maria", "Mirjam"]
+      },
+      {
+        title: "Mirjam",
+        passage: "2. Mose 15",
+        text: "Die Schwester von Mose und Aaron. Sie stimmte nach dem Durchqueren des Schilfmeers ein berühmtes Loblied an.",
+        question: "Wer war die Schwester von Mose und Aaron?",
+        answer: "Mirjam",
+        wrongs: ["Ruth", "Ester"]
+      },
+      {
+        title: "Daniel",
+        passage: "Daniel 6",
+        text: "Weil er treu zu Gott betete, wurde er in die Löwengrube geworfen. Gott beschützte ihn und die Löwen taten ihm nichts.",
+        question: "Wer überlebte unverletzt in der Löwengrube?",
+        answer: "Daniel",
+        wrongs: ["Jona", "Elia"]
+      },
+      {
+        title: "Jona",
+        passage: "Jona 1–4",
+        text: "Wollte vor Gottes Auftrag fliehen, wurde im Sturm verschlungen und verbrachte drei Tage im Bauch eines großen Fisches.",
+        question: "Wer verbrachte drei Tage im Bauch eines großen Fisches?",
+        answer: "Jona",
+        wrongs: ["Noah", "Daniel"]
+      },
+      {
+        title: "Königin Ester",
+        passage: "Buch Ester",
+        text: "Eine mutige jüdische Königin in Persien, die ihr gesamtes Volk vor der Vernichtung rettete.",
+        question: "Welche mutige Königin rettete ihr jüdisches Volk in Persien?",
+        answer: "Königin Ester",
+        wrongs: ["Sara", "Eva"]
       }
     ]
   },
@@ -609,25 +764,81 @@ const BIBLE_CATEGORIES = [
         title: "Maria",
         passage: "Lukas 1, 26–38",
         text: "Die Mutter von Jesus. Der Engel Gabriel verkündete ihr, dass sie den Sohn Gottes zur Welt bringen würde.",
-        question: "Welcher Engel verkündete Maria die Geburt Jesu?"
+        question: "Welcher Engel verkündete Maria die Geburt Jesu?",
+        answer: "Gabriel",
+        wrongs: ["Michael", "Raphael"]
       },
       {
         title: "Johannes der Täufer",
         passage: "Matthäus 3, 1–17",
-        text: "Rief die Menschen zur Umkehr auf und taufte auch Jesus im Fluss Jordan.",
-        question: "In welchem Fluss taufte Johannes der Täufer Jesus?"
+        text: "Rief die Menschen zur Umkehr auf und taufte viele Menschen, darunter auch Jesus, im Fluss Jordan.",
+        question: "In welchem Fluss taufte Johannes der Täufer Jesus?",
+        answer: "Im Jordan",
+        wrongs: ["Im Nil", "Im Rhein"]
       },
       {
         title: "Petrus",
         passage: "Matthäus 16, 18",
-        text: "Ein Fischer, der einer der engsten Jünger Jesu wurde. Er gilt als 'Fels', auf dem die Kirche gebaut ist.",
-        question: "Welcher Jünger Jesu war von Beruf Fischer und galt als 'Fels'?"
+        text: "Ein Fischer, der einer der engsten Jünger Jesu wurde. Er gilt als 'Fels', auf dem die Gemeinde gebaut wurde.",
+        question: "Welcher Jünger Jesu war von Beruf Fischer und wurde als 'Fels' bezeichnet?",
+        answer: "Petrus",
+        wrongs: ["Paulus", "Judas"]
       },
       {
         title: "Paulus",
         passage: "Apostelgeschichte 9",
         text: "Wandelte sich vom Verfolger der Christen zum bekanntesten Missionar, der viele Briefe im Neuen Testament schrieb.",
-        question: "Welcher frühere Verfolger wurde zum berühmten Missionar im NT?"
+        question: "Welcher frühere Verfolger wandelte sich zum berühmten Missionar Paulus?",
+        answer: "Saulus (Paulus)",
+        wrongs: ["Pontius Pilatus", "Herodes"]
+      },
+      {
+        title: "Josef von Nazaret",
+        passage: "Matthäus 1, 18–25",
+        text: "Der Ziehvater Jesu und Mann von Maria. Er arbeitete von Beruf als Zimmermann in Nazaret.",
+        question: "Welchen Beruf hatte Josef von Nazaret?",
+        answer: "Zimmermann",
+        wrongs: ["Fischer", "Hirte"]
+      },
+      {
+        title: "Maria Magdalena",
+        passage: "Johannes 20, 11–18",
+        text: "Eine treue Begleiterin Jesu. Sie war die erste Zeugin, die am leeren Grab dem auferstandenen Jesus begegnete.",
+        question: "Wer sah als erste das leere Grab und den auferstandenen Jesus?",
+        answer: "Maria Magdalena",
+        wrongs: ["Elisabeth", "Marta"]
+      },
+      {
+        title: "Der Apostel Johannes",
+        passage: "Johannes 19, 26",
+        text: "Der 'Jünger, den Jesus lieb hatte'. Er verfasste das vierte Evangelium und stand unter dem Kreuz Jesu.",
+        question: "Welcher Apostel verfasste das 4. Evangelium?",
+        answer: "Johannes",
+        wrongs: ["Lukas", "Markus"]
+      },
+      {
+        title: "Zachäus",
+        passage: "Lukas 19, 1–10",
+        text: "Ein kleiner Zöllner in Jericho. Er kletterte auf einen Maulbeerfeigenbaum, um Jesus sehen zu können.",
+        question: "Warum kletterte der Zöllner Zachäus auf einen Baum?",
+        answer: "Um Jesus zu sehen",
+        wrongs: ["Um Früchte zu ernten", "Um sich zu verstecken"]
+      },
+      {
+        title: "Lukas",
+        passage: "Lukas 1, 1–4",
+        text: "Ein Arzt und geschätzter Mitarbeiter von Paulus. Er schrieb das Lukasevangelium sowie die Apostelgeschichte.",
+        question: "Welchen Beruf hatte der Evangelist Lukas?",
+        answer: "Arzt",
+        wrongs: ["König", "Steuereintreiber"]
+      },
+      {
+        title: "Matthäus",
+        passage: "Matthäus 9, 9",
+        text: "Arbeitete als Zöllner, bevor Jesus ihn aufrief, ihm nachzufolgen. Er verfasste das erste Evangelium im NT.",
+        question: "Was war Matthäus von Beruf, bevor er Jesus nachfolgte?",
+        answer: "Zöllner",
+        wrongs: ["Bäcker", "Römischer Soldat"]
       }
     ]
   },
@@ -641,19 +852,81 @@ const BIBLE_CATEGORIES = [
         title: "Das Vaterunser (Komplett)", 
         passage: "Matthäus 6, 9–13",
         text: "Vater unser im Himmel, geheiligt werde dein Name. Dein Reich komme. Dein Wille geschehe, wie im Himmel so auf Erden. Unser tägliches Brot gib uns heute. Und vergib uns unsere Schuld, wie auch wir vergeben unseren Schuldigern. Und führe uns nicht in Versuchung, sondern erlöse uns von dem Bösen. Denn dein ist das Reich und die Kraft und die Herrlichkeit in Ewigkeit. Amen.",
-        question: "In welchem Evangelium steht das Vaterunser in der Bergpredigt?"
+        question: "In welchem bekannten Evangelium lehrt Jesus das Vaterunser in der Bergpredigt?",
+        answer: "Matthäus-Evangelium",
+        wrongs: ["Johannes-Evangelium", "Offenbarung"]
       },
       { 
         title: "Der Aaronitische Segen", 
         passage: "4. Mose 6, 24–26",
         text: "Der Herr segne dich und behüte dich. Der Herr lasse sein Angesicht leuchten über dir und sei dir gnädig. Der Herr hebe sein Angesicht über dich und gebe dir Frieden.",
-        question: "In welchem Buch Mose steht der berühmte Aaronitische Segen?"
+        question: "Wie beginnt der berühmte Aaronitische Segen aus dem 4. Buch Mose?",
+        answer: "Der Herr segne dich und behüte dich",
+        wrongs: ["Unser Vater im Himmel", "Der Herr ist mein Hirte"]
       },
       { 
         title: "Der Hirtenpsalm", 
         passage: "Psalm 23, 1–2",
         text: "Der Herr ist mein Hirte, mir wird nichts mangeln. Er weidet mich auf einer grünen Aue und führet mich zum frischen Wasser.",
-        question: "Wie beginnt der bekannte Psalm 23?"
+        question: "Wie beginnt der bekannte Psalm 23?",
+        answer: "Der Herr ist mein Hirte",
+        wrongs: ["Lobe den Herrn, meine Seele", "Gott ist unsere Zuversicht"]
+      },
+      {
+        title: "Das Friedensgebet",
+        passage: "Traditionell",
+        text: "O Herr, mache mich zu einem Werkzeug deines Friedens, dass ich Liebe übe, wo man sich hasst, und verzeihe, wo man sich beleidigt.",
+        question: "Wozu bittet man im bekannten Friedensgebet zu werden?",
+        answer: "Werkzeug deines Friedens",
+        wrongs: ["König der Welt", "Richter über andere"]
+      },
+      {
+        title: "Morgengebet (Luther)",
+        passage: "Kleiner Katechismus",
+        text: "Ich danke dir, mein himmlischer Vater, durch Jesus Christus, deinen lieben Sohn, dass du mich diese Nacht vor allem Schaden behütet hast.",
+        question: "Wofür dankt man traditionell im morgendlichen Gebet?",
+        answer: "Für den Schutz in der Nacht",
+        wrongs: ["Für das Abendessen", "Für das Ende der Schule"]
+      },
+      {
+        title: "Abendgebet",
+        passage: "Traditionell",
+        text: "Müde bin ich, geh zur Ruh, schließe beide Äuglein zu. Vater, lass die Augen dein über meinem Bette sein.",
+        question: "Wie lautet die bekannte erste Zeile des Kinder-Abendgebets?",
+        answer: "Müde bin ich, geh zur Ruh",
+        wrongs: ["Guten Morgen, lieber Gott", "Danke für diesen guten Morgen"]
+      },
+      {
+        title: "Tischgebet",
+        passage: "Traditionell",
+        text: "Komm, Herr Jesus, sei unser Gast und segne, was du uns bescheret hast. Amen.",
+        question: "Wann wird das Gebet 'Komm, Herr Jesus, sei unser Gast' gesprochen?",
+        answer: "Vor dem Essen (Tischgebet)",
+        wrongs: ["Vor dem Schlafen", "Am Geburtstag"]
+      },
+      {
+        title: "Der Lobpreis-Psalm",
+        passage: "Psalm 103, 1",
+        text: "Lobe den Herrn, meine Seele, und was in mir ist, seinen heiligen Namen!",
+        question: "Wer soll laut Psalm 103 den Herrn loben?",
+        answer: "Meine Seele",
+        wrongs: ["Die Engel allein", "Die Sonne"]
+      },
+      {
+        title: "Lobgesang der Maria (Magnificat)",
+        passage: "Lukas 1, 46–47",
+        text: "Meine Seele preist die Größe des Herrn, und mein Geist jubelt über Gott, meinen Retter.",
+        question: "Wie wird der Lobgesang der Maria im Lukasevangelium genannt?",
+        answer: "Magnificat",
+        wrongs: ["Kyrie Eleison", "Halleluja"]
+      },
+      {
+        title: "Schutzpsalm",
+        passage: "Psalm 91, 11",
+        text: "Denn er hat seinen Engeln befohlen über dir, dass sie dich behüten auf allen deinen Wegen.",
+        question: "Wer beschützt die Menschen laut Psalm 91 auf ihren Wegen?",
+        answer: "Gottes Engel",
+        wrongs: ["Römische Soldaten", "Könige"]
       }
     ]
   },
@@ -667,19 +940,81 @@ const BIBLE_CATEGORIES = [
         title: "Das Doppelgebot der Liebe", 
         passage: "Matthäus 22, 37–39",
         text: "Du sollst den Herrn, deinen Gott, lieben von ganzem Herzen. Und du sollst deinen Nächsten lieben wie dich selbst.",
-        question: "Wen sollst du laut dem Doppelgebot lieben wie dich selbst?"
+        question: "Wen sollst du laut dem Doppelgebot der Liebe wie dich selbst lieben?",
+        answer: "Deinen Nächsten",
+        wrongs: ["Nur deine Freunde", "Niemanden"]
       },
       { 
         title: "Die Goldene Regel", 
         passage: "Matthäus 7, 12",
         text: "Alles nun, was ihr wollt, dass euch die Menschen tun sollen, das tut ihnen auch!",
-        question: "Wie nennt man die Regel: 'Was du willst, dass man dir tut, das tue auch anderen'?"
+        question: "Wie lautet der Kern der Goldenen Regel?",
+        answer: "Behandle andere so, wie du behandelt werden willst",
+        wrongs: ["Auge um Auge, Zahn um Zahn", "Achte nur auf deinen eigenen Vorteil"]
       },
       { 
-        title: "Die Ten Commandments (10 Gebote)", 
+        title: "Die 10 Gebote", 
         passage: "2. Mose 20, 1–17",
         text: "Gottes Wegweiser für unser Leben, darunter: Du sollst nicht stehlen, du sollst nicht lügen, du sollst Vater und Mutter ehren.",
-        question: "Auf welchem Berg empfing Mose die 10 Gebote?"
+        question: "Wo wurden dem Volk Israel die 10 Gebote übergeben?",
+        answer: "Am Berg Sinai",
+        wrongs: ["In Jerusalem", "Am Fluss Jordan"]
+      },
+      {
+        title: "Barmherzigkeit",
+        passage: "Lukas 10 (Samariter)",
+        text: "In der Geschichte vom barmherzigen Samariter hilft ein Fremder einem Überfallenen, als alle anderen vorbeigehen.",
+        question: "Wer half dem Überfallenen in der Jesus-Geschichte?",
+        answer: "Der barmherzige Samariter",
+        wrongs: ["Ein Priester", "Ein Pharisäer"]
+      },
+      {
+        title: "Vergebung",
+        passage: "Matthäus 18, 21–22",
+        text: "Auf Petrus' Frage, wie oft man vergeben soll, antwortete Jesus: Nicht siebenmal, sondern siebenundsiebzigmal (immer wieder)!",
+        question: "Wie oft soll man laut Jesus vergeben?",
+        answer: "Immer wieder (siebenundsiebzigmal)",
+        wrongs: ["Nur 1 Mal", "Maximal 3 Mal"]
+      },
+      {
+        title: "Glaube, Hoffnung, Liebe",
+        passage: "1. Korinther 13, 13",
+        text: "Nun aber bleiben Glaube, Hoffnung, Liebe, diese drei; aber die Liebe ist die größte unter ihnen.",
+        question: "Was ist laut Paulus in 1. Korinther 13 die größte dieser drei Tugenden?",
+        answer: "Die Liebe",
+        wrongs: ["Der Glaube", "Die Hoffnung"]
+      },
+      {
+        title: "Die Bergpredigt",
+        passage: "Matthäus 5–7",
+        text: "Eine große Rede Jesu über das Reich Gottes, den Frieden, die Feindesliebe und das rechte Handeln.",
+        question: "Wie nennt man die berühmte Rede Jesu am Berg im Matthäusevangelium?",
+        answer: "Bergpredigt",
+        wrongs: ["Tempelrede", "Abschiedsgebet"]
+      },
+      {
+        title: "Feindesliebe",
+        passage: "Matthäus 5, 44",
+        text: "Liebt eure Feinde und betet für die, die euch verfolgen – so zeigt ihr, dass ihr Gottes Kinder seid.",
+        question: "Was fordert Jesus bezüglich unserer Feinde?",
+        answer: "Liebt eure Feinde und betet für sie",
+        wrongs: ["Bekämpft sie hart", "Ignoriert sie völlig"]
+      },
+      {
+        title: "Die Barmherzigen (Seligpreisungen)",
+        passage: "Matthäus 5, 7",
+        text: "Selig sind die Barmherzigen; denn sie werden Barmherzigkeit erlangen.",
+        question: "Wer wird laut den Seligpreisungen Barmherzigkeit erlangen?",
+        answer: "Die Barmherzigen",
+        wrongs: ["Die Reichen", "Die Stärksten"]
+      },
+      {
+        title: "Ehrlichkeit & Wahrheit",
+        passage: "Epheser 4, 25",
+        text: "Darum legt die Lüge ab und redet die Wahrheit, ein jeder mit seinem Nächsten.",
+        question: "Was soll laut Epheserbrief anstelle der Lüge gewählt werden?",
+        answer: "Die Wahrheit",
+        wrongs: ["Das Schweigen", "Eine Ausrede"]
       }
     ]
   }
@@ -692,13 +1027,13 @@ let progressData = loadProgress();
 
 function loadProgress() {
   try {
-    const raw = localStorage.getItem('bibelAppProgress_v112');
+    const raw = localStorage.getItem('bibelAppProgress_v120');
     return raw ? JSON.parse(raw) : {};
   } catch(e) { return {}; }
 }
 
 function saveProgress() {
-  try { localStorage.setItem('bibelAppProgress_v112', JSON.stringify(progressData)); } catch(e){}
+  try { localStorage.setItem('bibelAppProgress_v120', JSON.stringify(progressData)); } catch(e){}
 }
 
 function markSeen(catId, idx) {
@@ -826,7 +1161,7 @@ document.getElementById('btn-back-from-cards').addEventListener('click', () => {
   renderOverview();
 });
 
-/* ===== QUIZ LOGIK (Echte Fragen & Konfetti) ===== */
+/* ===== QUIZ LOGIK (Inhaltliche Antworten & Konfetti) ===== */
 let quizQuestions = [];
 let quizIndex = 0;
 let quizScore = 0;
@@ -834,18 +1169,15 @@ let quizScore = 0;
 function buildQuiz() {
   const allCards = [];
   BIBLE_CATEGORIES.forEach(c => c.cards.forEach(card => {
-    if (card.question) allCards.push(card);
+    if (card.question && card.answer && card.wrongs) allCards.push(card);
   }));
 
   const shuffled = [...allCards].sort(() => 0.5 - Math.random());
   const selected = shuffled.slice(0, 5);
 
   return selected.map(q => {
-    const wrongPool = allCards.filter(x => x.title !== q.title);
-    const wrongShuffled = wrongPool.sort(() => 0.5 - Math.random());
-    const wrongs = wrongShuffled.slice(0, 2).map(x => x.title);
-    const options = [q.title, ...wrongs].sort(() => 0.5 - Math.random());
-    return { promptQuestion: q.question, correctAnswer: q.title, options };
+    const options = [q.answer, ...q.wrongs].sort(() => 0.5 - Math.random());
+    return { promptQuestion: q.question, correctAnswer: q.answer, options };
   });
 }
 
@@ -932,7 +1264,6 @@ function finishQuiz() {
     document.getElementById('result-text').textContent = 'Guter Versuch! Übe noch ein wenig weiter.';
   }
 
-  // Konfetti-Regen bei Beendigung aller 5 Fragen!
   triggerConfetti();
 }
 
